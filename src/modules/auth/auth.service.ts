@@ -35,9 +35,14 @@ const loginUserIntoDB = async (payload: Login) => {
     email: user.email,
   };
 
-  const accessToken = jwt.sign(jwtPayload, config.secret as string, { expiresIn: "7d" });
+  const Token = jwt.sign(jwtPayload, config.secret as string, {
+    expiresIn: "7d",
+  });
 
-  return accessToken;
+  return {
+    Token,
+    user,
+  };
 };
 
 export const authServiece = {
