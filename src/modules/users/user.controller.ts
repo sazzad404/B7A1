@@ -2,28 +2,10 @@ import type { Request, Response } from "express";
 import { pool } from "../../DB";
 import { userService } from "./user.service";
 
-const createUser = async (req: Request, res: Response) => {
-  console.log(req.body)
-  try {
-    const result = await userService.createUserIntoBD(req.body);
-    
 
-    res.status(201).json({
-      message: "Created successfully!!",
-      data: result.rows[0],
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: error,
-      //   data: result.rows[0],
-    });
-  }
-};
 
 const getAllUser = async (req: Request, res: Response) => {
-  console.log(req.user)
+
   try {
     const result = await userService.getAllUserFromDB();
     res.status(200).json({
@@ -65,7 +47,7 @@ const getSingleUser = async (req: Request, res: Response) => {
   }
 };
 export const userController = {
-  createUser,
+  
   getAllUser,
   getSingleUser,
 };

@@ -1,9 +1,18 @@
 import type { Request, Response } from "express";
 import { issueService } from "./issues.service";
+import type { JwtPayload } from "jsonwebtoken";
+import type { CustomJwtPayload } from "../../middleware";
 
 const createIssue = async (req: Request, res: Response) => {
   try {
-    const result = await issueService.issueCreateIntoDB(req.body);
+    const reporter_id = req.user?.id;
+
+    const payload = {
+      ...req.body,
+      reporter_id,
+    };
+
+    const result = await issueService.issueCreateIntoDB(payload);
 
     res.status(201).json({
       success: true,
@@ -25,6 +34,7 @@ const getAllIssue = async (req: Request, res: Response) => {
     const result = await issueService.getIssueFromDB(req);
     res.status(200).json({
       success: true,
+      message: "Issues retrived successfully",
       data: result.rows,
     });
   } catch (error: any) {
@@ -51,6 +61,7 @@ const getSingleIssue = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
+      message: "Issue retrived successfully",
       data: result.rows,
     });
   } catch (error: any) {
@@ -66,7 +77,11 @@ const updateIssue = async (req: Request, res: Response) => {
   const { id } = req.params;
   const body = req.body;
   try {
-    const result = await issueService.updateIssueFromDB(id as string, body);
+    const result = await issueService.updateIssueFromDB(
+      id as string,
+      body,
+      req.user,
+    );
 
     if (result.rowCount === 0) {
       throw new Error("forbidden");
@@ -93,13 +108,11 @@ const deleteIssue = async (req: Request, res: Response) => {
   try {
     const result = await issueService.deleteIssueFromDB(id as string);
 
-    console.log(result)
+    console.log(result);
 
-    if(result.rowCount === 0){
+    if (result.rowCount === 0) {
       throw new Error("Issue Not Found");
-      
     }
-
 
     res.status(200).json({
       success: true,

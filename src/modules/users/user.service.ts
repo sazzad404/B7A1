@@ -2,23 +2,7 @@ import { pool } from "../../DB";
 import type { User } from "./user.interface";
 import bcrypt from "bcrypt";
 
-const createUserIntoBD = async (payload: User) => {
-  const { name, email, password, role } = payload;
 
-  console.log(password)
-  const hashPassword = await bcrypt.hash(password,10 )
-  console.log(hashPassword)
-
-  const finalRole = role ?? "contributor";
-  const result = await pool.query(
-    `
-    INSERT INTO users(name, email, password, role) VALUES($1,$2,$3, $4) RETURNING name, email, role
-    `,
-    [name, email, hashPassword, finalRole],
-  );
-
-  return result;
-};
 
 const getAllUserFromDB = async () => {
   const result = await pool.query(`
@@ -40,7 +24,7 @@ const getSingleUserFromDB = async (id: string) => {
 };
 
 export const userService = {
-  createUserIntoBD,
+ 
   getAllUserFromDB,
   getSingleUserFromDB,
 };

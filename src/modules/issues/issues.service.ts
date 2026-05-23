@@ -128,9 +128,41 @@ const getSingleIssueFromDB = async (id: string) => {
   return result;
 };
 
-const updateIssueFromDB = async (id: string, body: IssueBody) => {
+const updateIssueFromDB = async (
+  id: string,
+  body: IssueBody,
+  user: { id: string; role: string },
+) => {
   const { title, description, type } = body;
 
+  //1. issue fetch
+  const issueResult = await pool.query(
+    `
+     SELECT * FROM issues WHERE id=$1
+    
+    `,
+    [id],
+  );
+
+  if (issueResult.rows.length === 0) {
+    throw new Error("Issue Not Found");
+  }
+
+  const issue = issueResult.rows[0];
+
+  //2.permission check
+  if (user?.role === "contributor") {
+    // is owner?
+    if (issue.reporter_id !== user.id) {
+      throw new Error("FORBIDDEN_NOT_OWNER");
+    }
+    //only Open issue
+    if (issue.status !== "open") {
+      throw new Error("FORBIDDEN_STATUS");
+    }
+  }
+
+  // update
   const result = await pool.query(
     `
   UPDATE issues
@@ -150,25 +182,22 @@ const updateIssueFromDB = async (id: string, body: IssueBody) => {
   return result;
 };
 
-
-
-const deleteIssueFromDB = async(id: string)=>{
-
-  const result =await pool.query(`
+const deleteIssueFromDB = async (id: string) => {
+  const result = await pool.query(
+    `
     DELETE FROM issues WHERE id=$1
     
-    `,[id])
+    `,
+    [id],
+  );
 
-    return result
-
-
-
-}
+  return result;
+};
 
 export const issueService = {
   issueCreateIntoDB,
   getIssueFromDB,
   getSingleIssueFromDB,
   updateIssueFromDB,
-  deleteIssueFromDB
+  deleteIssueFromDB,
 };
